@@ -10,7 +10,7 @@
         default_layer {
             display-name = "Base";
             bindings = <
-                &out OUT_TOG &out OUT_BLE  &out OUT_2G4  &out OUT_USB
+                &kp A  &out OUT_BLE  &out OUT_2G4  &out OUT_USB
             >;
         };
     };
