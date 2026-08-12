@@ -22,8 +22,10 @@ include:
 
   - board: nice_nano_v2
     shield: test_kb
+    artifact-name: test_kb
   - board: nice_nano_v2
     shield: test_dongle
+    artifact-name: test_dongle
 ## To build with ZMK Studio support, uncomment the following block
 ## by removing the leading '#' from each line.
 
