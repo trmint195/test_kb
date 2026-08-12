@@ -1,0 +1,20 @@
+#include "test_kb.dtsi"
+
+/ {
+    kscan0: kscan0 {
+        compatible = "zmk,kscan-gpio-direct";
+        wakeup-source;
+
+        input-gpios
+            = <&pro_micro 8 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+            , <&pro_micro 9 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+            , <&pro_micro 16 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+            , <&pro_micro 10 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>
+            ;
+    };
+};
+
+&physical_layout_test_kb {
+    kscan = <&kscan0>;
+};
+

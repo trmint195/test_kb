@@ -1,0 +1,18 @@
+#include "test_kb-layouts.dtsi"
+#include <dt-bindings/zmk/matrix_transform.h>
+
+/ {
+    matrix_transform0: matrix_transform0 {
+        compatible = "zmk,matrix-transform";
+        columns = <4>;
+        rows = <1>;
+        map = <
+            RC(0,0) RC(0,1) RC(0,2) RC(0,3)
+        >;
+    };
+};
+
+&physical_layout_test_kb {
+    transform = <&matrix_transform0>;
+};
+
