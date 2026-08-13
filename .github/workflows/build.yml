@@ -1,6 +1,17 @@
 name: Build ZMK firmware
-on: [push, pull_request, workflow_dispatch]
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  # Tự động trigger khi workflow "One-Time AES Key Generator" hoàn thành thành công
+  workflow_run:
+    workflows: ["One-Time AES Key Generator"]
+    types:
+      - completed
 
 jobs:
   build:
+    # Chỉ chạy nếu không phải do workflow_run kích hoạt HOẶC nếu do workflow_run kích hoạt thì kết quả phải là thành công
+    if: ${{ github.event.workflow_run == null || github.event.workflow_run.conclusion == 'success' }}
     uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3
