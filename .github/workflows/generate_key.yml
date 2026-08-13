@@ -1,0 +1,33 @@
+name: One-Time AES Key Generator
+
+# Chỉ chạy khi bấm nút trên giao diện GitHub
+on:
+  workflow_dispatch:
+
+jobs:
+  generate-and-commit-key:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Cấp quyền ghi để commit file
+      
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate Random AES Key
+        run: |
+          # 1. Sinh chuỗi Hex ngẫu nhiên 32 ký tự (16 bytes)
+          RANDOM_KEY=$(openssl rand -hex 16)
+          echo "Generated Key: $RANDOM_KEY"
+
+          # 2. Thay thế giá trị trong file config/test_dongle.conf
+          sed -i "s/CONFIG_ZMK_2G4_AES_KEY=.*/CONFIG_ZMK_2G4_AES_KEY=\"$RANDOM_KEY\"/" config/test_dongle.conf
+
+          # 3. Cấu hình Git để commit
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # 4. Commit và Push thay đổi trực tiếp lên repo
+          git add config/test_dongle.conf
+          git commit -m "chore: generate random ZMK 2.4G AES key"
+          git push
