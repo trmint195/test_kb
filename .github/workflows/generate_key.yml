@@ -1,15 +1,15 @@
 name: Generate AES Key and Build
 
-# Chỉ chạy khi bấm nút thủ công trên giao diện GitHub
+# Trigger manually via GitHub Actions tab
 on:
   workflow_dispatch:
 
 jobs:
-  # JOB 1: Sinh key, cập nhật tất cả file config và commit lên repo
+  # JOB 1: Generate key, update all config files, and commit changes back to the repository
   generate-key:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Cấp quyền ghi để git push
+      contents: write # Grant write permissions to enable git push
       
     steps:
       - name: Checkout repository
@@ -17,38 +17,38 @@ jobs:
 
       - name: Generate Random AES Key for All Config Files
         run: |
-          # 1. Sinh chuỗi Hex ngẫu nhiên 32 ký tự (16 bytes = 128-bit key)
+          # 1. Generate a random 32-character hexadecimal string (16 bytes = 128-bit key)
           RANDOM_KEY=$(openssl rand -hex 16)
           echo "Generated Key: $RANDOM_KEY"
 
-          # 2. Tìm tất cả file .conf trong thư mục config/ chứa keyword CONFIG_ZMK_2G4_AES_KEY
+          # 2. Find all .conf files in the config/ directory containing CONFIG_ZMK_2G4_AES_KEY
           FILES=$(grep -rl "CONFIG_ZMK_2G4_AES_KEY" config/*.conf 2>/dev/null || true)
 
           if [ -z "$FILES" ]; then
-            echo "Không tìm thấy file .conf nào chứa CONFIG_ZMK_2G4_AES_KEY trong thư mục config/"
+            echo "No .conf files containing CONFIG_ZMK_2G4_AES_KEY were found in the config/ directory."
             exit 0
           fi
 
-          # 3. Thay thế key vào tất cả các file tìm thấy
+          # 3. Iterate through all matching files and replace the AES key
           for file in $FILES; do
-            echo "Đang cập nhật key cho file: $file"
+            echo "Updating key for file: $file"
             sed -i "s/CONFIG_ZMK_2G4_AES_KEY=.*/CONFIG_ZMK_2G4_AES_KEY=\"$RANDOM_KEY\"/" "$file"
           done
 
-          # 4. Cấu hình Git để commit
+          # 4. Configure Git identity
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # 5. Commit và Push thay đổi
+          # 5. Stage, commit, and push changes
           git add config/*.conf
           if git diff --staged --quiet; then
-            echo "Không có thay đổi nào để commit."
+            echo "No changes to commit."
           else
             git commit -m "chore: generate random ZMK 2.4G AES key"
             git push
           fi
 
-  # JOB 2: Build firmware ZMK (Tự động chờ JOB 1 hoàn thành)
+  # JOB 2: Build ZMK firmware (Runs automatically after generate-key finishes)
   build:
-    needs: generate-key # Bắt buộc chờ job generate-key xong mới chạy
+    needs: generate-key # Wait for job generate-key to complete before running
     uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@v0.3
